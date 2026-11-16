@@ -1,0 +1,21 @@
+<article class="product-card">
+  <a class="product-thumb" href="/produk/<%= product.id %>" aria-label="<%= product.name %>">
+    <% if (product.is_featured) { %><span class="badge">★ Unggulan</span><% } %>
+    <img src="<%= product.image_url || '/assets/img-placeholder.svg' %>" alt="<%= product.name %>" loading="lazy">
+  </a>
+  <div class="product-body">
+    <span class="chip"><%= product.category_name %></span>
+    <h3><a href="/produk/<%= product.id %>"><%= product.name %></a></h3>
+    <p class="price"><%= rupiah(product.price) %></p>
+    <p class="stock">
+      <span class="dot <%= product.stock === 0 ? 'out' : (product.stock < 5 ? 'low' : '') %>"></span>
+      <%= product.stock === 0 ? 'Stok habis' : `Stok ${product.stock}` %>
+    </p>
+    <p class="desc"><%= product.description || 'Produk pilihan Toko Mama.' %></p>
+    <% if (whatsapp.linkFor) { %>
+      <a class="btn btn-wa" href="<%= whatsapp.linkFor(`Halo Toko Mama, saya mau pesan produk: ${product.name} (${rupiah(product.price)}). Apakah stok masih tersedia?`) %>" target="_blank" rel="noopener noreferrer">Pesan via WhatsApp</a>
+    <% } else { %>
+      <span class="btn btn-disabled" aria-disabled="true">WhatsApp belum diatur</span>
+    <% } %>
+  </div>
+</article>

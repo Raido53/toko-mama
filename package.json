@@ -1,0 +1,27 @@
+{
+  "name": "toko-mama",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Toko Mama - katalog & manajemen produk UMKM (admin, seller, pembeli)",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "db:setup": "node scripts/setup-db.js",
+    "db:reset": "node scripts/setup-db.js --reset",
+    "db:seed": "node scripts/seed.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.10",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
+    "multer": "^2.5.0",
+    "mysql2": "^3.24.6"
+  }
+}

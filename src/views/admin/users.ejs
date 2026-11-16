@@ -1,0 +1,164 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <section class="page-head">
+    <div>
+      <h1>Kelola User</h1>
+      <p>Kelola akun admin, seller, dan pembeli Toko Mama.</p>
+    </div>
+    <a class="btn btn-ghost" href="/">Lihat katalog</a>
+  </section>
+
+  <div class="stats">
+    <div class="stat accent"><span>Total user</span><strong><%= stats.total %></strong></div>
+    <div class="stat"><span>Admin</span><strong><%= stats.admin %></strong></div>
+    <div class="stat"><span>Seller</span><strong><%= stats.seller %></strong></div>
+    <div class="stat"><span>Pembeli</span><strong><%= stats.pembeli %></strong></div>
+    <div class="stat"><span>Nonaktif</span><strong><%= stats.inactive %></strong></div>
+  </div>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <strong>Periksa kembali data berikut:</strong>
+      <ul>
+        <% errors.forEach((message) => { %><li><%= message %></li><% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <div class="layout-2">
+    <section class="panel" id="form-user">
+      <div class="panel-head">
+        <h2><%= form.id ? 'Edit user' : 'Tambah user baru' %></h2>
+        <% if (form.id) { %><span class="lock">Editing #<%= form.id %></span><% } %>
+      </div>
+
+      <form method="post" action="<%= form.id ? `/admin/users/${form.id}/update` : '/admin/users/create' %>" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label class="field-block">
+          <span>Nama lengkap <em class="req">*</em></span>
+          <input type="text" name="name" value="<%= form.name %>" maxlength="80" required>
+        </label>
+
+        <div class="grid-2">
+          <label class="field-block">
+            <span>Email <em class="req">*</em></span>
+            <input type="email" name="email" value="<%= form.email %>" maxlength="160" required>
+          </label>
+          <label class="field-block">
+            <span>Role <em class="req">*</em></span>
+            <select name="role" required>
+              <% ['admin', 'seller', 'pembeli'].forEach((role) => { %>
+                <option value="<%= role %>" <%= form.role === role ? 'selected' : '' %>><%= roles[role] %></option>
+              <% }); %>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid-2">
+          <label class="field-block">
+            <span>Nomor WhatsApp</span>
+            <input type="text" name="phone" value="<%= form.phone %>" inputmode="numeric" placeholder="628xxxxxxxxxx" maxlength="20">
+          </label>
+          <label class="field-block">
+            <span><%= form.id ? 'Password baru (opsional)' : 'Password' %> <% if (!form.id) { %><em class="req">*</em><% } %></span>
+            <input type="password" name="password" minlength="8" <%= form.id ? '' : 'required' %> autocomplete="new-password" placeholder="Minimal 8 karakter">
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary"><%= form.id ? 'Simpan perubahan' : 'Tambah user' %></button>
+          <% if (form.id) { %><a class="btn btn-ghost" href="/admin/users">Batal edit</a><% } %>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel panel-wa">
+      <h2>Nomor WhatsApp admin</h2>
+      <p class="hint">Nomor ini dipakai pembeli untuk menghubungi admin lewat tombol WhatsApp di katalog.</p>
+      <form method="post" action="/admin/settings/whatsapp" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="field-block">
+          <span>Nomor aktif</span>
+          <input type="text" name="whatsapp_number" value="<%= whatsappNumber %>" inputmode="numeric" placeholder="6281234567890" maxlength="20">
+        </label>
+        <button type="submit" class="btn btn-primary">Simpan nomor</button>
+      </form>
+      <p class="hint">Format: kode negara 62 tanpa tanda +, 8–15 digit angka.</p>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Daftar user</h2>
+      <form class="filters" method="get" action="/admin/users">
+        <input type="search" name="q" value="<%= q %>" placeholder="Cari nama atau email">
+        <select name="role" data-auto-submit>
+          <option value="">Semua role</option>
+          <option value="admin" <%= roleFilter === 'admin' ? 'selected' : '' %>>Admin</option>
+          <option value="seller" <%= roleFilter === 'seller' ? 'selected' : '' %>>Seller</option>
+          <option value="pembeli" <%= roleFilter === 'pembeli' ? 'selected' : '' %>>Pembeli</option>
+        </select>
+        <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
+        <% if (q || roleFilter) { %><a class="btn btn-ghost btn-sm" href="/admin/users">Reset</a><% } %>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Role</th>
+            <th>WhatsApp</th>
+            <th>Status</th>
+            <th>Terakhir masuk</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach((user) => { %>
+            <tr>
+              <td>
+                <div class="cell-title"><%= user.name %><% if (user.id === currentUser.id) { %> <span class="tag">Anda</span><% } %></div>
+                <div class="cell-sub"><%= user.email %></div>
+              </td>
+              <td><span class="tag tag-<%= user.role %>"><%= roles[user.role] %></span></td>
+              <td><%= user.phone || '—' %></td>
+              <td>
+                <span class="status <%= user.is_active ? 'status-on' : 'status-off' %>">
+                  <%= user.is_active ? 'Aktif' : 'Nonaktif' %>
+                </span>
+              </td>
+              <td><%= user.last_login_at ? dateId(user.last_login_at) : 'Belum pernah' %></td>
+              <td class="actions-cell">
+                <a class="btn btn-ghost btn-sm" href="/admin/users?edit=<%= user.id %>">Edit</a>
+                <% if (user.id !== currentUser.id) { %>
+                  <form method="post" action="/admin/users/<%= user.id %>/toggle" class="inline-form">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-ghost btn-sm">
+                      <%= user.is_active ? 'Nonaktifkan' : 'Aktifkan' %>
+                    </button>
+                  </form>
+                  <form method="post" action="/admin/users/<%= user.id %>/delete" class="inline-form" data-confirm="Hapus akun <%= user.name %>? Tindakan ini tidak bisa dibatalkan.">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+          <% if (!users.length) { %>
+            <tr><td colspan="6" class="empty-row">Tidak ada user yang cocok dengan filter.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,171 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <section class="page-head">
+    <div>
+      <h1>Kelola Produk</h1>
+      <p>Tambahkan produk, atur harga dan stok, lalu tampilkan di katalog pembeli.</p>
+    </div>
+    <a class="btn btn-ghost" href="/seller/kategori">Kelola kategori</a>
+  </section>
+
+  <div class="stats">
+    <div class="stat accent"><span>Produk saya</span><strong><%= stats.total %></strong></div>
+    <div class="stat"><span>Total stok</span><strong><%= stats.stock %></strong></div>
+    <div class="stat"><span>Unggulan</span><strong><%= stats.featured %></strong></div>
+    <div class="stat"><span>Stok habis</span><strong><%= stats.outOfStock %></strong></div>
+    <div class="stat"><span>Kategori</span><strong><%= stats.categories %></strong></div>
+  </div>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <strong>Periksa kembali data berikut:</strong>
+      <ul>
+        <% errors.forEach((message) => { %><li><%= message %></li><% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <section class="panel" id="form-produk">
+    <div class="panel-head">
+      <h2><%= form.id ? 'Edit produk' : 'Tambah produk baru' %></h2>
+      <% if (form.id) { %><span class="lock">Editing #<%= form.id %></span><% } %>
+    </div>
+
+    <form method="post"
+          action="<%= form.id ? `/seller/produk/${form.id}/update` : '/seller/produk/create' %>"
+          enctype="multipart/form-data" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="grid-2">
+        <label class="field-block">
+          <span>Nama produk <em class="req">*</em></span>
+          <input type="text" name="name" value="<%= form.name %>" maxlength="80" required>
+        </label>
+        <label class="field-block">
+          <span>Kategori <em class="req">*</em></span>
+          <select name="category_id" required>
+            <option value="">— Pilih kategori —</option>
+            <% categories.forEach((category) => { %>
+              <option value="<%= category.id %>" <%= String(form.category_id) === String(category.id) ? 'selected' : '' %>><%= category.name %></option>
+            <% }); %>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid-2">
+        <label class="field-block">
+          <span>Harga (Rp) <em class="req">*</em></span>
+          <input type="number" name="price" value="<%= form.price %>" min="0" step="1" required>
+        </label>
+        <label class="field-block">
+          <span>Stok <em class="req">*</em></span>
+          <input type="number" name="stock" value="<%= form.stock %>" min="0" step="1" required>
+        </label>
+      </div>
+
+      <label class="field-block">
+        <span>Deskripsi</span>
+        <textarea name="description" maxlength="300" rows="3" placeholder="Deskripsi singkat produk (maks. 300 karakter)"><%= form.description %></textarea>
+      </label>
+
+      <div class="upload-box">
+        <div class="upload-preview">
+          <img id="image-preview" src="<%= form.image_url || '/assets/img-placeholder.svg' %>" alt="Pratinjau gambar produk">
+          <div>
+            <strong>Gambar produk</strong>
+            <p class="hint">Unggah JPG/PNG/WebP maksimal 2 MB, atau isi URL gambar di bawah.</p>
+            <input type="file" name="image" accept="image/jpeg,image/png,image/webp" data-image-input>
+          </div>
+        </div>
+        <label class="field-block">
+          <span>Atau URL gambar</span>
+          <input type="text" name="image_url" value="<%= form.image_url && form.image_url.startsWith('http') ? form.image_url : '' %>" placeholder="https://…">
+        </label>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" name="is_featured" <%= form.is_featured ? 'checked' : '' %>>
+        <span>Tandai sebagai produk unggulan (badge ★ di katalog)</span>
+      </label>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary"><%= form.id ? 'Simpan perubahan' : 'Tambah produk' %></button>
+        <% if (form.id) { %><a class="btn btn-ghost" href="/seller/produk">Batal edit</a><% } %>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Daftar produk saya</h2>
+      <form class="filters" method="get" action="/seller/produk">
+        <input type="search" name="q" value="<%= q %>" placeholder="Cari produk">
+        <select name="kategori" data-auto-submit>
+          <option value="">Semua kategori</option>
+          <% categories.forEach((cat) => { %>
+            <option value="<%= cat.slug %>" <%= category === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+          <% }); %>
+        </select>
+        <select name="sort" data-auto-submit>
+          <option value="terbaru" <%= sort === 'terbaru' ? 'selected' : '' %>>Terbaru</option>
+          <option value="nama-asc" <%= sort === 'nama-asc' ? 'selected' : '' %>>Nama A–Z</option>
+          <option value="nama-desc" <%= sort === 'nama-desc' ? 'selected' : '' %>>Nama Z–A</option>
+          <option value="harga-asc" <%= sort === 'harga-asc' ? 'selected' : '' %>>Harga termurah</option>
+          <option value="harga-desc" <%= sort === 'harga-desc' ? 'selected' : '' %>>Harga termahal</option>
+          <option value="stok-desc" <%= sort === 'stok-desc' ? 'selected' : '' %>>Stok terbanyak</option>
+        </select>
+        <button type="submit" class="btn btn-ghost btn-sm">Filter</button>
+        <% if (q || category) { %><a class="btn btn-ghost btn-sm" href="/seller/produk">Reset</a><% } %>
+      </form>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Produk</th>
+            <th>Kategori</th>
+            <th>Harga</th>
+            <th>Stok</th>
+            <th>Unggulan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach((product) => { %>
+            <tr>
+              <td><img class="table-thumb" src="<%= product.image_url || '/assets/img-placeholder.svg' %>" alt=""></td>
+              <td>
+                <div class="cell-title"><%= product.name %></div>
+                <div class="cell-sub"><%= product.description || '—' %></div>
+              </td>
+              <td><span class="chip"><%= product.category_name %></span></td>
+              <td><%= rupiah(product.price) %></td>
+              <td>
+                <span class="status <%= product.stock === 0 ? 'status-off' : 'status-on' %>"><%= product.stock %></span>
+              </td>
+              <td><%= product.is_featured ? '★' : '—' %></td>
+              <td class="actions-cell">
+                <a class="btn btn-ghost btn-sm" href="/seller/produk?edit=<%= product.id %>">Edit</a>
+                <form method="post" action="/seller/produk/<%= product.id %>/delete" class="inline-form" data-confirm="Hapus produk &quot;<%= product.name %>&quot;?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+          <% if (!products.length) { %>
+            <tr><td colspan="7" class="empty-row">Belum ada produk. Tambahkan produk pertama Anda di form atas.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

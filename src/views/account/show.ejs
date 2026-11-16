@@ -1,0 +1,43 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <section class="page-head">
+    <div>
+      <h1>Akun Saya</h1>
+      <p>Halo <%= currentUser.name %>, ini ringkasan akun pembeli Anda.</p>
+    </div>
+    <a class="btn btn-ghost" href="/">Lihat katalog</a>
+  </section>
+
+  <div class="layout-2">
+    <section class="panel">
+      <h2>Data akun</h2>
+      <dl class="detail-meta">
+        <div><dt>Nama</dt><dd><%= currentUser.name %></dd></div>
+        <div><dt>Email</dt><dd><%= currentUser.email %></dd></div>
+        <div><dt>Peran</dt><dd><%= roles[currentUser.role] %></dd></div>
+        <div><dt>Telepon</dt><dd><%= currentUser.phone || '—' %></dd></div>
+      </dl>
+      <p class="hint">Ingin mengubah data akun? Hubungi admin toko.</p>
+    </section>
+
+    <section class="panel panel-wa">
+      <h2>Hubungi admin toko</h2>
+      <p>Semua pertanyaan, pemesanan, dan perubahan akun dilayani admin melalui WhatsApp.</p>
+      <% if (whatsapp.link) { %>
+        <a class="btn btn-wa btn-block" href="<%= whatsapp.linkFor(`Halo Admin Toko Mama, saya ${currentUser.name}. Saya ingin bertanya tentang produk.`) %>" target="_blank" rel="noopener noreferrer">
+          Chat Admin via WhatsApp
+        </a>
+        <p class="hint">Nomor admin: <%= whatsapp.number %></p>
+      <% } else { %>
+        <p class="hint">Nomor WhatsApp admin belum diatur. Silakan coba lagi nanti.</p>
+      <% } %>
+      <a class="btn btn-ghost btn-block" href="/">Jelajahi katalog</a>
+    </section>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

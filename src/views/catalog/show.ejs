@@ -1,0 +1,57 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Katalog</a>
+    <span>/</span>
+    <a href="/?kategori=<%= product.category_slug %>"><%= product.category_name %></a>
+    <span>/</span>
+    <span><%= product.name %></span>
+  </nav>
+
+  <section class="detail">
+    <div class="detail-media">
+      <% if (product.is_featured) { %><span class="badge">★ Unggulan</span><% } %>
+      <img src="<%= product.image_url || '/assets/img-placeholder.svg' %>" alt="<%= product.name %>">
+    </div>
+    <div class="detail-info">
+      <span class="chip"><%= product.category_name %></span>
+      <h1><%= product.name %></h1>
+      <p class="price price-lg"><%= rupiah(product.price) %></p>
+      <p class="stock">
+        <span class="dot <%= product.stock === 0 ? 'out' : (product.stock < 5 ? 'low' : '') %>"></span>
+        <%= product.stock === 0 ? 'Stok habis' : `Stok tersedia: ${product.stock}` %>
+      </p>
+      <p class="detail-desc"><%= product.description || 'Belum ada deskripsi untuk produk ini.' %></p>
+      <dl class="detail-meta">
+        <div><dt>Seller</dt><dd><%= product.seller_name %></dd></div>
+        <div><dt>Kategori</dt><dd><%= product.category_name %></dd></div>
+      </dl>
+      <div class="detail-actions">
+        <% if (whatsapp.linkFor) { %>
+          <a class="btn btn-wa btn-lg" href="<%= whatsapp.linkFor(`Halo Toko Mama, saya mau pesan produk: ${product.name} (${rupiah(product.price)}). Apakah stok masih tersedia?\n${appUrl}/produk/${product.id}`) %>" target="_blank" rel="noopener noreferrer">Pesan via WhatsApp</a>
+        <% } else { %>
+          <span class="btn btn-disabled btn-lg">WhatsApp belum diatur</span>
+        <% } %>
+        <a class="btn btn-ghost" href="/">Kembali ke katalog</a>
+      </div>
+      <p class="hint">Pesanan diproses langsung oleh admin toko melalui WhatsApp.</p>
+    </div>
+  </section>
+
+  <% if (related && related.length) { %>
+    <section class="related">
+      <h2>Produk lain di kategori ini</h2>
+      <div class="product-grid">
+        <% related.forEach((item) => { %>
+          <%- include('../partials/product-card', { product: item }) %>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

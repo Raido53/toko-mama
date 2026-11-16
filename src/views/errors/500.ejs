@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <div class="empty-state">
+    <span class="error-code">500</span>
+    <h1>Terjadi kesalahan</h1>
+    <p>Permintaan Anda gagal diproses. Silakan coba lagi beberapa saat lagi.</p>
+    <% if (typeof detail !== 'undefined' && detail) { %>
+      <pre class="error-detail"><%= detail %></pre>
+    <% } %>
+    <a class="btn btn-primary" href="/">Kembali ke katalog</a>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,89 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">Katalog UMKM · Toko Mama</span>
+      <h1>Belanja kebutuhan harian, langsung dari Mama.</h1>
+      <p>Sembako, minuman, perlengkapan bayi, sampai kebutuhan rumah tangga. Pilih produknya, lalu pesan lewat WhatsApp admin toko.</p>
+      <div class="hero-actions">
+        <% if (whatsapp.link) { %>
+          <a class="btn btn-wa" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya tentang produk.') %>" target="_blank" rel="noopener noreferrer">Hubungi Admin via WhatsApp</a>
+        <% } %>
+        <a class="btn btn-ghost" href="#katalog">Lihat katalog</a>
+      </div>
+      <ul class="hero-facts">
+        <li><strong><%= totalProducts %></strong><span>produk tersedia</span></li>
+        <li><strong><%= categories.length %></strong><span>kategori</span></li>
+        <li><strong>2</strong><span>seller aktif</span></li>
+      </ul>
+    </div>
+    <div class="hero-card">
+      <h2>Pesan cepat via WhatsApp</h2>
+      <p>Klik tombol pesan di setiap produk. Pesan otomatis sudah berisi nama dan harga produk.</p>
+      <ol class="hero-steps">
+        <li>Cari produk lewat pencarian atau filter kategori.</li>
+        <li>Buka detail untuk melihat stok dan deskripsi.</li>
+        <li>Tekan “Pesan via WhatsApp” dan kirim pesannya.</li>
+      </ol>
+      <p class="hint">Pembeli tidak perlu membuat akun untuk melihat katalog.</p>
+    </div>
+  </section>
+
+  <section id="katalog" class="catalog-section">
+    <form class="toolbar" method="get" action="/">
+      <label class="field field-search">
+        <span class="sr-only">Cari produk</span>
+        <input type="search" name="q" value="<%= q %>" placeholder="Cari nama atau deskripsi produk…">
+      </label>
+      <label class="field field-select">
+        <span class="sr-only">Filter kategori</span>
+        <select name="kategori" data-auto-submit>
+          <option value="">Semua kategori</option>
+          <% categories.forEach((item) => { %>
+            <option value="<%= item.slug %>" <%= category === item.slug ? 'selected' : '' %>><%= item.name %></option>
+          <% }); %>
+        </select>
+      </label>
+      <label class="field field-select">
+        <span class="sr-only">Urutkan</span>
+        <select name="sort" data-auto-submit>
+          <option value="nama-asc" <%= sort === 'nama-asc' ? 'selected' : '' %>>Nama A–Z</option>
+          <option value="harga-asc" <%= sort === 'harga-asc' ? 'selected' : '' %>>Harga termurah</option>
+          <option value="harga-desc" <%= sort === 'harga-desc' ? 'selected' : '' %>>Harga termahal</option>
+          <option value="stok-desc" <%= sort === 'stok-desc' ? 'selected' : '' %>>Stok terbanyak</option>
+          <option value="terbaru" <%= sort === 'terbaru' ? 'selected' : '' %>>Terbaru</option>
+        </select>
+      </label>
+      <button class="btn btn-primary" type="submit">Cari</button>
+      <% if (q || category) { %>
+        <a class="btn btn-ghost" href="/">Reset</a>
+      <% } %>
+    </form>
+
+    <p class="result-meta">
+      Menampilkan <strong><%= products.length %></strong> produk
+      <% if (q) { %> untuk pencarian “<%= q %>”<% } %>
+      <% if (category) { %> di kategori <strong><%= (categories.find((c) => c.slug === category) || {}).name || category %></strong><% } %>
+    </p>
+
+    <% if (products.length) { %>
+      <div class="product-grid">
+        <% products.forEach((product) => { %>
+          <%- include('../partials/product-card', { product }) %>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="empty-state">
+        <h2>Tidak ada produk yang cocok</h2>
+        <p>Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
+        <a class="btn btn-primary" href="/">Lihat semua produk</a>
+      </div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

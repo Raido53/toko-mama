@@ -1,0 +1,43 @@
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/">
+      <span class="logo" aria-hidden="true">TM</span>
+      <span class="brand-text">
+        <strong>Toko Mama</strong>
+        <small>Katalog &amp; dashboard UMKM</small>
+      </span>
+    </a>
+
+    <nav class="main-nav" aria-label="Navigasi utama">
+      <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Katalog</a>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <a href="/admin/users" class="<%= currentPath.startsWith('/admin') ? 'active' : '' %>">Kelola User</a>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'seller') { %>
+        <a href="/seller/produk" class="<%= currentPath.startsWith('/seller/produk') ? 'active' : '' %>">Produk</a>
+        <a href="/seller/kategori" class="<%= currentPath.startsWith('/seller/kategori') ? 'active' : '' %>">Kategori</a>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'pembeli') { %>
+        <a href="/akun" class="<%= currentPath.startsWith('/akun') ? 'active' : '' %>">Akun Saya</a>
+      <% } %>
+    </nav>
+
+    <div class="header-actions">
+      <% if (currentUser) { %>
+        <span class="user-chip">
+          <span class="avatar" aria-hidden="true"><%= currentUser.name.charAt(0).toUpperCase() %></span>
+          <span class="user-meta">
+            <strong><%= currentUser.name %></strong>
+            <small><%= roles[currentUser.role] %></small>
+          </span>
+        </span>
+        <form action="/logout" method="post">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-ghost btn-sm">Keluar</button>
+        </form>
+      <% } else { %>
+        <a class="btn btn-primary btn-sm" href="/login">Masuk</a>
+      <% } %>
+    </div>
+  </div>
+</header>
