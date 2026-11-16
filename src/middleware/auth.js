@@ -12,7 +12,7 @@ async function attachUser(req, res, next) {
 
   try {
     const user = await db.one(
-      'SELECT id, name, email, role, phone, is_active FROM users WHERE id = ? LIMIT 1',
+      'SELECT id, name, email, role, phone, avatar_url, is_active, created_at, last_login_at FROM users WHERE id = ? LIMIT 1',
       [req.session.userId]
     );
 

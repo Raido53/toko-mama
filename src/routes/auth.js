@@ -35,6 +35,63 @@ function registerFailure(key) {
   record.count += 1;
 }
 
+router.get('/register', (req, res) => {
+  if (req.user) return res.redirect(homeFor(req.user));
+  return res.render('auth/register', {
+    title: 'Daftar Akun',
+    form: { name: '', email: '' },
+    errors: [],
+  });
+});
+
+router.post(
+  '/register',
+  asyncHandler(async (req, res) => {
+    const form = {
+      name: str(req.body.name).slice(0, 80),
+      email: str(req.body.email).toLowerCase().slice(0, 160),
+    };
+    const password = str(req.body.password);
+    const confirm = str(req.body.confirm_password);
+    const errors = [];
+
+    if (form.name.length < 2) errors.push('Nama minimal 2 karakter.');
+    if (!isEmail(form.email)) errors.push('Format email tidak valid.');
+    if (password.length < 8) errors.push('Password minimal 8 karakter.');
+    if (password !== confirm) errors.push('Konfirmasi password tidak cocok.');
+
+    if (!errors.length) {
+      const existing = await db.one('SELECT id FROM users WHERE email = ? LIMIT 1', [form.email]);
+      if (existing) errors.push('Email sudah terdaftar. Silakan masuk.');
+    }
+
+    if (errors.length) {
+      return res.status(400).render('auth/register', {
+        title: 'Daftar Akun',
+        form,
+        errors,
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const result = await db.insert(
+      `INSERT INTO users (name, email, password_hash, role, is_active) VALUES (?, ?, ?, 'pembeli', 1)`,
+      [form.name, form.email, passwordHash]
+    );
+
+    req.session.regenerate((regenerateError) => {
+      if (regenerateError) return res.redirect('/login');
+      req.session.userId = result.insertId;
+      req.session.role = 'pembeli';
+      req.session.csrfToken = null;
+      req.session.save(() => {
+        if (req.session) req.session.flash = [];
+        res.redirect('/profil');
+      });
+    });
+  })
+);
+
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect(homeFor(req.user));
   return res.render('auth/login', {

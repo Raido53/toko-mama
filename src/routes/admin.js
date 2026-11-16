@@ -29,7 +29,7 @@ async function pageData(req, opts = {}) {
   const where = [];
   const params = [];
   if (q) {
-    where.push('(name LIKE ? OR email LIKE ?)');
+    where.push(`(name ${db.like} ? OR email ${db.like} ?)`);
     params.push(`%${q}%`, `%${q}%`);
   }
   if (isRole(roleFilter)) {
@@ -38,17 +38,17 @@ async function pageData(req, opts = {}) {
   }
 
   const users = await db.query(
-    `SELECT id, name, email, role, phone, is_active, last_login_at, created_at
+    `SELECT id, name, email, role, phone, avatar_url, is_active, last_login_at, created_at
        FROM users
       ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-      ORDER BY FIELD(role, 'admin', 'seller', 'pembeli'), name ASC`,
+      ORDER BY CASE role WHEN 'admin' THEN 1 WHEN 'seller' THEN 2 ELSE 3 END, name ASC`,
     params
   );
 
   const roleRows = await db.query(
-    'SELECT role, COUNT(*) AS total, SUM(is_active = 1) AS active FROM users GROUP BY role'
+    'SELECT role, COUNT(*) AS total, SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active FROM users GROUP BY role'
   );
-  const totals = await db.one('SELECT COUNT(*) AS total, SUM(is_active = 1) AS active FROM users');
+  const totals = await db.one('SELECT COUNT(*) AS total, SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) AS active FROM users');
 
   const stats = {
     total: Number(totals.total),

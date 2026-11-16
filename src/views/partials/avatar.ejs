@@ -1,0 +1,7 @@
+<% if (typeof user !== 'undefined' && user && user.avatar_url) { %>
+  <img class="avatar avatar-photo" src="<%= user.avatar_url %>" alt="Foto profil <%= user.name %>">
+<% } else { %>
+  <span class="avatar avatar-initial"><%=
+    (typeof user !== 'undefined' && user && user.name ? user.name.trim().charAt(0) : '?').toUpperCase()
+  %></span>
+<% } %>

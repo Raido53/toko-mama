@@ -98,22 +98,28 @@ const PRODUCTS = [
 
 (async () => {
   console.log('Mengosongkan data lama…');
-  await db.query('SET FOREIGN_KEY_CHECKS = 0');
-  await db.query('DELETE FROM products');
-  await db.query('DELETE FROM categories');
-  await db.query('DELETE FROM sessions');
-  await db.query('DELETE FROM users');
-  await db.query('DELETE FROM settings');
-  for (const table of ['users', 'categories', 'products']) {
-    await db.query(`ALTER TABLE ${table} AUTO_INCREMENT = 1`);
+  if (db.isPostgres) {
+    await db.query(
+      'TRUNCATE TABLE products, categories, sessions, users, settings RESTART IDENTITY CASCADE'
+    );
+  } else {
+    await db.query('SET FOREIGN_KEY_CHECKS = 0');
+    await db.query('DELETE FROM products');
+    await db.query('DELETE FROM categories');
+    await db.query('DELETE FROM sessions');
+    await db.query('DELETE FROM users');
+    await db.query('DELETE FROM settings');
+    for (const table of ['users', 'categories', 'products']) {
+      await db.query(`ALTER TABLE ${table} AUTO_INCREMENT = 1`);
+    }
+    await db.query('SET FOREIGN_KEY_CHECKS = 1');
   }
-  await db.query('SET FOREIGN_KEY_CHECKS = 1');
 
   console.log('Membuat akun dummy…');
   const userIds = {};
   for (const user of USERS) {
     const passwordHash = await bcrypt.hash(user.password, 12);
-    const result = await db.query(
+    const result = await db.insert(
       `INSERT INTO users (name, email, password_hash, role, phone, is_active)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [user.name, user.email, passwordHash, user.role, user.phone || null, user.isActive === 0 ? 0 : 1]
@@ -130,7 +136,7 @@ const PRODUCTS = [
   console.log('Membuat kategori…');
   const categoryIds = {};
   for (const category of CATEGORIES) {
-    const result = await db.query(
+    const result = await db.insert(
       'INSERT INTO categories (name, slug, description, created_by) VALUES (?, ?, ?, ?)',
       [category.name, category.slug, category.description, sellerIds[0]]
     );

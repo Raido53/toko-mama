@@ -1,21 +1,68 @@
-<% if (whatsapp && whatsapp.link) { %>
-  <a class="wa-fab" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya tentang produk.') %>" target="_blank" rel="noopener noreferrer">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Zm5.5-7.5c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.1-.3-.2-.6-.3Z"/></svg>
-    <span>Chat Admin</span>
-  </a>
-<% } else { %>
-  <a class="wa-fab" href="/login">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Z"/></svg>
-    <span>Hubungi Admin</span>
-  </a>
-<% } %>
+<footer class="site-footer" id="bantuan">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand footer-logo" href="/">
+        <span class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.4 11.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8L4 8Z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/></svg>
+        </span>
+        <span class="brand-text"><strong>Toko Mama</strong><small>Katalog UMKM</small></span>
+      </a>
+      <p class="footer-desc">
+        Toko kebutuhan harian keluarga: sembako, perlengkapan bayi, hingga kebutuhan rumah.
+        Semua pesanan diproses admin lewat WhatsApp.
+      </p>
+      <div class="footer-contact">
+        <% if (whatsapp.link) { %>
+          <a class="footer-wa" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya.') %>" target="_blank" rel="noopener noreferrer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Z"/></svg>
+            <span>+<%= whatsapp.number %></span>
+          </a>
+        <% } else { %>
+          <span class="footer-wa muted">Nomor WhatsApp belum diatur</span>
+        <% } %>
+      </div>
+    </div>
 
-<footer class="site-footer">
-  <div class="container">
-    <p>© <%= new Date().getFullYear() %> Toko Mama — katalog &amp; manajemen produk UMKM.</p>
-    <p class="muted">Butuh bantuan? Hubungi admin toko melalui WhatsApp.</p>
+    <div class="footer-col">
+      <h3>Informasi</h3>
+      <a href="/">Tentang Kami</a>
+      <a href="/#katalog">Cara Pesan</a>
+      <a href="/login">Masuk Akun</a>
+      <a href="/register">Daftar Akun</a>
+    </div>
+
+    <div class="footer-col">
+      <h3>Kategori</h3>
+      <% (navCategories || []).slice(0, 6).forEach((item) => { %>
+        <a href="/?kategori=<%= item.slug %>"><%= item.name %></a>
+      <% }); %>
+    </div>
+
+    <div class="footer-col">
+      <h3>Bantuan</h3>
+      <a href="/#bantuan">Hubungi Admin</a>
+      <a href="/#cara-pesan">Panduan Pemesanan</a>
+      <a href="/profil">Pengaturan Akun</a>
+      <% if (whatsapp.link) { %>
+        <a href="<%= whatsapp.link %>" target="_blank" rel="noopener noreferrer">WhatsApp Admin</a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>© <%= new Date().getFullYear() %> Toko Mama. Katalog &amp; manajemen produk UMKM.</p>
+    <div class="payment-chips" aria-label="Metode pembayaran">
+      <span>Transfer Bank</span><span>QRIS</span><span>COD</span>
+    </div>
   </div>
 </footer>
+
+<% if (whatsapp && whatsapp.link) { %>
+  <a class="wa-fab" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya tentang produk.') %>" target="_blank" rel="noopener noreferrer">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Z"/></svg>
+    <span>Chat Admin</span>
+  </a>
+<% } %>
 
 <script src="/assets/js/app.js" defer></script>
 </body>

@@ -1,43 +1,44 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 
-<main id="main" class="container">
+<main id="main" class="container auth-page">
   <%- include('../partials/flash') %>
 
   <div class="auth-layout">
-    <section class="panel auth-panel">
+    <section class="panel glass-card auth-panel">
+      <span class="hero-eyebrow">Selamat datang</span>
       <h1>Masuk ke Toko Mama</h1>
-      <p class="hint">Gunakan akun yang diberikan admin toko.</p>
+      <p class="hint">Gunakan akun yang diberikan admin toko, atau akun pembeli hasil pendaftaran.</p>
 
       <% if (typeof error !== 'undefined' && error) { %>
         <div class="alert alert-error"><%= error %></div>
       <% } %>
 
-      <form method="post" action="/login" class="stack">
+      <form method="post" action="/login" class="stack" data-check-form>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="next" value="<%= next %>">
         <label class="field-block">
           <span>Email</span>
-          <input type="email" name="email" value="<%= email %>" autocomplete="email" required autofocus>
+          <input type="email" name="email" value="<%= email %>" autocomplete="email" data-check="email" required autofocus>
         </label>
         <label class="field-block">
           <span>Password</span>
-          <input type="password" name="password" autocomplete="current-password" required>
+          <input type="password" name="password" autocomplete="current-password" data-check="password" required>
         </label>
-        <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Masuk</button>
       </form>
-      <p class="hint">Belum punya akun? Akun pembeli dibuat oleh admin toko.</p>
+      <p class="auth-switch">Belum punya akun? <a href="/register">Daftar gratis</a></p>
     </section>
 
-    <aside class="panel demo-panel">
+    <aside class="panel glass-card auth-side">
       <h2>Akun demo</h2>
       <p class="hint">Data dummy dari <code>npm run db:seed</code>.</p>
       <ul class="demo-list">
         <li><span class="tag tag-admin">Admin</span><code>admin@tokomama.id</code><em>Admin#123</em></li>
         <li><span class="tag tag-seller">Seller</span><code>mama@tokomama.id</code><em>Seller#123</em></li>
         <li><span class="tag tag-seller">Seller</span><code>budi@tokomama.id</code><em>Seller#123</em></li>
-        <li><span class="tag tag-buyer">Pembeli</span><code>siti@gmail.com</code><em>Pembeli#123</em></li>
-        <li><span class="tag tag-buyer">Pembeli</span><code>rina@gmail.com</code><em>Pembeli#123</em></li>
+        <li><span class="tag tag-pembeli">Pembeli</span><code>siti@gmail.com</code><em>Pembeli#123</em></li>
+        <li><span class="tag tag-pembeli">Pembeli</span><code>rina@gmail.com</code><em>Pembeli#123</em></li>
       </ul>
       <p class="hint">Pembeli hanya dapat melihat katalog dan menghubungi admin via WhatsApp.</p>
     </aside>

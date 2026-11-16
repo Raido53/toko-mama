@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,
   role          ENUM('admin','seller','pembeli') NOT NULL DEFAULT 'pembeli',
   phone         VARCHAR(20)  DEFAULT NULL,
+  avatar_url    MEDIUMTEXT   DEFAULT NULL,
   is_active     TINYINT(1)   NOT NULL DEFAULT 1,
   last_login_at DATETIME     DEFAULT NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

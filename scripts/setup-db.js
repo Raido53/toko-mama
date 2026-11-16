@@ -3,19 +3,63 @@ require('../src/config');
 
 const fs = require('fs');
 const path = require('path');
-const mysql = require('mysql2/promise');
 const config = require('../src/config');
 
 const RESET = process.argv.includes('--reset');
 
-(async () => {
-  const { host, port, user, password, database } = config.db;
+async function setupPostgres() {
+  const { Client } = require('pg');
+  const client = new Client({
+    connectionString: config.db.url || undefined,
+    host: config.db.url ? undefined : config.db.host,
+    port: config.db.url ? undefined : config.db.port,
+    user: config.db.url ? undefined : config.db.user,
+    password: config.db.url ? undefined : config.db.password,
+    database: config.db.url ? undefined : config.db.database,
+    ssl: config.db.ssl,
+  });
+
+  try {
+    await client.connect();
+  } catch (error) {
+    if (error.code === '3D000') {
+      throw new Error(
+        'Database belum ada. Buat project/database di Supabase lalu isi DATABASE_URL dari menu Project Settings → Database.'
+      );
+    }
+    throw error;
+  }
+
+  try {
+    if (RESET) {
+      console.log('Menghapus tabel lama…');
+      await client.query(
+        'DROP TABLE IF EXISTS products, categories, sessions, settings, users CASCADE'
+      );
+    }
+
+    const schema = fs.readFileSync(path.join(__dirname, 'schema.pg.sql'), 'utf8');
+    await client.query(schema);
+
+    console.log('Database PostgreSQL siap (Supabase).');
+    if (!RESET) {
+      console.log('Tabel dibuat jika belum ada. Jalankan `npm run db:seed` untuk data contoh.');
+    }
+  } finally {
+    await client.end();
+  }
+}
+
+async function setupMysql() {
+  const mysql = require('mysql2/promise');
+  const { host, port, user, password, database, ssl } = config.db;
 
   const connection = await mysql.createConnection({
     host,
     port,
     user,
     password,
+    ssl,
     multipleStatements: true,
   });
 
@@ -41,6 +85,14 @@ const RESET = process.argv.includes('--reset');
     }
   } finally {
     await connection.end();
+  }
+}
+
+(async () => {
+  if (config.db.client === 'postgres') {
+    await setupPostgres();
+  } else {
+    await setupMysql();
   }
 })().catch((error) => {
   console.error('Gagal menyiapkan database:', error.message);

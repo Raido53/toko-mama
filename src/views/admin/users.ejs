@@ -9,7 +9,10 @@
       <h1>Kelola User</h1>
       <p>Kelola akun admin, seller, dan pembeli Toko Mama.</p>
     </div>
-    <a class="btn btn-ghost" href="/">Lihat katalog</a>
+    <div class="page-head-actions">
+      <a class="btn btn-ghost" href="/profil">Profil saya</a>
+      <a class="btn btn-ghost" href="/">Lihat katalog</a>
+    </div>
   </section>
 
   <div class="stats">
@@ -36,7 +39,7 @@
         <% if (form.id) { %><span class="lock">Editing #<%= form.id %></span><% } %>
       </div>
 
-      <form method="post" action="<%= form.id ? `/admin/users/${form.id}/update` : '/admin/users/create' %>" class="stack">
+      <form method="post" action="<%= form.id ? `/admin/users/${form.id}/update` : '/admin/users/create' %>" class="stack" data-check-form>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
         <label class="field-block">
@@ -47,7 +50,7 @@
         <div class="grid-2">
           <label class="field-block">
             <span>Email <em class="req">*</em></span>
-            <input type="email" name="email" value="<%= form.email %>" maxlength="160" required>
+            <input type="email" name="email" value="<%= form.email %>" maxlength="160" data-check="email" required>
           </label>
           <label class="field-block">
             <span>Role <em class="req">*</em></span>
@@ -66,7 +69,7 @@
           </label>
           <label class="field-block">
             <span><%= form.id ? 'Password baru (opsional)' : 'Password' %> <% if (!form.id) { %><em class="req">*</em><% } %></span>
-            <input type="password" name="password" minlength="8" <%= form.id ? '' : 'required' %> autocomplete="new-password" placeholder="Minimal 8 karakter">
+            <input type="password" name="password" minlength="8" data-check="password" data-min="8" <%= form.id ? 'data-optional' : 'required' %> autocomplete="new-password" placeholder="Minimal 8 karakter">
           </label>
         </div>
 
@@ -124,8 +127,13 @@
           <% users.forEach((user) => { %>
             <tr>
               <td>
-                <div class="cell-title"><%= user.name %><% if (user.id === currentUser.id) { %> <span class="tag">Anda</span><% } %></div>
-                <div class="cell-sub"><%= user.email %></div>
+                <div class="user-cell">
+                  <%- include('../partials/avatar', { user }) %>
+                  <div>
+                    <div class="cell-title"><%= user.name %><% if (user.id === currentUser.id) { %> <span class="tag">Anda</span><% } %></div>
+                    <div class="cell-sub"><%= user.email %></div>
+                  </div>
+                </div>
               </td>
               <td><span class="tag tag-<%= user.role %>"><%= roles[user.role] %></span></td>
               <td><%= user.phone || '—' %></td>

@@ -1,42 +1,185 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 
-<main id="main" class="container">
-  <%- include('../partials/flash') %>
+<main id="main">
+  <div class="container">
+    <%- include('../partials/flash') %>
+  </div>
 
-  <section class="hero">
-    <div class="hero-copy">
-      <span class="eyebrow">Katalog UMKM · Toko Mama</span>
-      <h1>Belanja kebutuhan harian, langsung dari Mama.</h1>
-      <p>Sembako, minuman, perlengkapan bayi, sampai kebutuhan rumah tangga. Pilih produknya, lalu pesan lewat WhatsApp admin toko.</p>
-      <div class="hero-actions">
-        <% if (whatsapp.link) { %>
-          <a class="btn btn-wa" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya tentang produk.') %>" target="_blank" rel="noopener noreferrer">Hubungi Admin via WhatsApp</a>
-        <% } %>
-        <a class="btn btn-ghost" href="#katalog">Lihat katalog</a>
+  <section class="hero-wrap">
+    <div class="container">
+      <div class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <span class="hero-eyebrow">Koleksi terbaru · Toko Mama</span>
+          <h1>Belanja kebutuhan harian <span>dimulai dari sini.</span></h1>
+          <p>Sembako, minuman, perlengkapan bayi, sampai peralatan rumah. Pilih produknya, lalu selesaikan pesanan lewat WhatsApp admin — cepat dan tanpa aplikasi tambahan.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary btn-lg" href="#katalog">Belanja sekarang
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </a>
+            <a class="btn btn-glass btn-lg" href="#kategori">Lihat kategori</a>
+          </div>
+          <ul class="hero-facts">
+            <li><strong><%= totals.products %></strong><span>produk siap pesan</span></li>
+            <li><strong><%= totals.categories %></strong><span>kategori</span></li>
+            <li><strong><%= totals.sellers %></strong><span>seller aktif</span></li>
+          </ul>
+          <ul class="hero-points">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              Pesan langsung via WhatsApp
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/></svg>
+              Stok diperbarui seller
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              Dibalas cepat setiap hari
+            </li>
+          </ul>
+        </div>
+
+        <div class="hero-visual">
+          <span class="hero-orb orb-1" aria-hidden="true"></span>
+          <span class="hero-orb orb-2" aria-hidden="true"></span>
+          <% (featured.length ? featured.slice(0, 2) : products.slice(0, 2)).forEach((item, index) => { %>
+            <a class="hero-product glass-card hero-product-<%= index + 1 %>" href="/produk/<%= item.id %>">
+              <span class="hero-product-thumb">
+                <img src="<%= item.image_url || '/assets/img-placeholder.svg' %>" alt="<%= item.name %>">
+              </span>
+              <span class="hero-product-info">
+                <small><%= item.category_name %></small>
+                <strong><%= item.name %></strong>
+                <em><%= rupiah(item.price) %></em>
+              </span>
+            </a>
+          <% }); %>
+          <div class="hero-badge glass-card">
+            <span class="hero-badge-dot"></span>
+            Admin online · siap bantu
+          </div>
+        </div>
       </div>
-      <ul class="hero-facts">
-        <li><strong><%= totalProducts %></strong><span>produk tersedia</span></li>
-        <li><strong><%= categories.length %></strong><span>kategori</span></li>
-        <li><strong>2</strong><span>seller aktif</span></li>
-      </ul>
-    </div>
-    <div class="hero-card">
-      <h2>Pesan cepat via WhatsApp</h2>
-      <p>Klik tombol pesan di setiap produk. Pesan otomatis sudah berisi nama dan harga produk.</p>
-      <ol class="hero-steps">
-        <li>Cari produk lewat pencarian atau filter kategori.</li>
-        <li>Buka detail untuk melihat stok dan deskripsi.</li>
-        <li>Tekan “Pesan via WhatsApp” dan kirim pesannya.</li>
-      </ol>
-      <p class="hint">Pembeli tidak perlu membuat akun untuk melihat katalog.</p>
     </div>
   </section>
 
-  <section id="katalog" class="catalog-section">
-    <form class="toolbar" method="get" action="/">
+  <% if (!isFiltering) { %>
+    <section class="section container" id="kategori">
+      <div class="section-head">
+        <span class="section-number">01</span>
+        <h2>Kategori populer</h2>
+        <a class="section-link" href="#katalog">Lihat semua produk
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+      <div class="category-grid">
+        <% categories.slice(0, 8).forEach((item) => { %>
+          <a class="category-tile" href="/?kategori=<%= item.slug %>">
+            <span class="category-circle"><%= item.name.charAt(0).toUpperCase() %></span>
+            <strong><%= item.name %></strong>
+            <small><%= item.product_count %> produk</small>
+          </a>
+        <% }); %>
+      </div>
+    </section>
+
+    <% if (featured.length) { %>
+      <section class="section container">
+        <div class="section-head">
+          <span class="section-number">02</span>
+          <h2>Produk terlaris</h2>
+          <a class="section-link" href="/?sort=stok-desc">Lihat semua produk
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="product-grid product-grid-featured">
+          <% featured.forEach((product) => { %>
+            <%- include('../partials/product-card', { product }) %>
+          <% }); %>
+        </div>
+      </section>
+    <% } %>
+
+    <section class="section container">
+      <div class="section-head">
+        <span class="section-number">03</span>
+        <h2>Kenapa belanja di Toko Mama?</h2>
+      </div>
+      <div class="benefit-grid">
+        <div class="benefit-card glass-card">
+          <span class="benefit-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <strong>Produk terkurasi</strong>
+          <p>Produk dipilih langsung oleh seller, stok dan harga selalu diperbarui.</p>
+        </div>
+        <div class="benefit-card glass-card">
+          <span class="benefit-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 3V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          <strong>Pesan lewat WhatsApp</strong>
+          <p>Tanpa checkout ribet. Pesan otomatis berisi nama dan harga produk.</p>
+        </div>
+        <div class="benefit-card glass-card">
+          <span class="benefit-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          </span>
+          <strong>Stok real-time</strong>
+          <p>Status stok ditampilkan di setiap produk supaya tidak kehabisan.</p>
+        </div>
+        <div class="benefit-card glass-card">
+          <span class="benefit-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>
+          <strong>Admin responsif</strong>
+          <p>Semua pertanyaan dijawab admin toko melalui WhatsApp.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="section-head">
+        <span class="section-number">04</span>
+        <h2>Promo pilihan</h2>
+      </div>
+      <div class="promo-banner">
+        <div class="promo-glow" aria-hidden="true"></div>
+        <div class="promo-copy">
+          <span class="promo-eyebrow">Penawaran spesial</span>
+          <h2>Produk unggulan pilihan<br><span>harga lebih bersahabat.</span></h2>
+          <p>Tanyakan promo terbaru dan stok terbatas langsung ke admin toko.</p>
+          <div class="promo-actions">
+            <a class="btn btn-primary" href="#katalog">Belanja sekarang</a>
+            <% if (whatsapp.link) { %>
+              <a class="btn btn-glass" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, ada promo produk unggulan hari ini?') %>" target="_blank" rel="noopener noreferrer">Tanya promo</a>
+            <% } %>
+          </div>
+        </div>
+        <div class="promo-products">
+          <% featured.slice(0, 3).forEach((item) => { %>
+            <a class="promo-product glass-card" href="/produk/<%= item.id %>">
+              <img src="<%= item.image_url || '/assets/img-placeholder.svg' %>" alt="<%= item.name %>">
+              <span><%= item.name %></span>
+            </a>
+          <% }); %>
+        </div>
+      </div>
+    </section>
+  <% } %>
+
+  <section class="section container" id="katalog">
+    <div class="section-head">
+      <span class="section-number"><%= isFiltering ? '★' : '05' %></span>
+      <h2><%= isFiltering ? 'Hasil pencarian' : 'Semua produk' %></h2>
+      <span class="section-count"><%= products.length %> produk</span>
+    </div>
+
+    <form class="toolbar glass-card" method="get" action="/">
       <label class="field field-search">
         <span class="sr-only">Cari produk</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input type="search" name="q" value="<%= q %>" placeholder="Cari nama atau deskripsi produk…">
       </label>
       <label class="field field-select">
@@ -51,24 +194,24 @@
       <label class="field field-select">
         <span class="sr-only">Urutkan</span>
         <select name="sort" data-auto-submit>
+          <option value="terbaru" <%= sort === 'terbaru' ? 'selected' : '' %>>Terbaru</option>
           <option value="nama-asc" <%= sort === 'nama-asc' ? 'selected' : '' %>>Nama A–Z</option>
           <option value="harga-asc" <%= sort === 'harga-asc' ? 'selected' : '' %>>Harga termurah</option>
           <option value="harga-desc" <%= sort === 'harga-desc' ? 'selected' : '' %>>Harga termahal</option>
           <option value="stok-desc" <%= sort === 'stok-desc' ? 'selected' : '' %>>Stok terbanyak</option>
-          <option value="terbaru" <%= sort === 'terbaru' ? 'selected' : '' %>>Terbaru</option>
         </select>
       </label>
       <button class="btn btn-primary" type="submit">Cari</button>
-      <% if (q || category) { %>
-        <a class="btn btn-ghost" href="/">Reset</a>
-      <% } %>
+      <% if (isFiltering) { %><a class="btn btn-ghost" href="/">Reset</a><% } %>
     </form>
 
-    <p class="result-meta">
-      Menampilkan <strong><%= products.length %></strong> produk
-      <% if (q) { %> untuk pencarian “<%= q %>”<% } %>
-      <% if (category) { %> di kategori <strong><%= (categories.find((c) => c.slug === category) || {}).name || category %></strong><% } %>
-    </p>
+    <% if (q || activeCategory) { %>
+      <p class="result-meta">
+        Menampilkan <strong><%= products.length %></strong> produk
+        <% if (q) { %> untuk “<strong><%= q %></strong>”<% } %>
+        <% if (activeCategory) { %> di kategori <strong><%= activeCategory.name %></strong><% } %>
+      </p>
+    <% } %>
 
     <% if (products.length) { %>
       <div class="product-grid">
@@ -77,12 +220,36 @@
         <% }); %>
       </div>
     <% } else { %>
-      <div class="empty-state">
+      <div class="empty-state glass-card">
         <h2>Tidak ada produk yang cocok</h2>
-        <p>Coba ubah kata kunci pencarian atau pilih kategori lain.</p>
-        <a class="btn btn-primary" href="/">Lihat semua produk</a>
+        <p>Coba kata kunci lain, atau tanyakan langsung kebutuhan Anda ke admin lewat WhatsApp.</p>
+        <div class="actions center">
+          <a class="btn btn-primary" href="/">Lihat semua produk</a>
+          <% if (whatsapp.link) { %>
+            <a class="btn btn-wa" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya mencari produk yang belum ada di katalog.') %>" target="_blank" rel="noopener noreferrer">Tanya admin</a>
+          <% } %>
+        </div>
       </div>
     <% } %>
+  </section>
+
+  <section class="container trust-strip" id="cara-pesan">
+    <div class="trust-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+      <span><strong>Pembayaran fleksibel</strong>Transfer bank, QRIS, atau COD</span>
+    </div>
+    <div class="trust-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      <span><strong>Seller terverifikasi</strong>Dikelola langsung pemilik toko</span>
+    </div>
+    <div class="trust-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg>
+      <span><strong>Pesan cepat</strong>Tanpa daftar untuk melihat katalog</span>
+    </div>
+    <div class="trust-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 3V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span><strong>Admin siap bantu</strong>Senang membantu setiap hari</span>
+    </div>
   </section>
 </main>
 

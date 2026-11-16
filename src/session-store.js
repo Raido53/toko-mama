@@ -42,11 +42,12 @@ class MySQLSessionStore extends session.Store {
 
   set(sid, sess, callback = () => {}) {
     const expires = this.expiryFor(sess);
-    db.query(
-      `INSERT INTO sessions (session_id, data, expires) VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE data = VALUES(data), expires = VALUES(expires)`,
-      [sid, JSON.stringify(sess), expires]
-    )
+    const sql = db.isPostgres
+      ? `INSERT INTO sessions (session_id, data, expires) VALUES (?, ?, ?)
+         ON CONFLICT (session_id) DO UPDATE SET data = EXCLUDED.data, expires = EXCLUDED.expires`
+      : `INSERT INTO sessions (session_id, data, expires) VALUES (?, ?, ?)
+         ON DUPLICATE KEY UPDATE data = VALUES(data), expires = VALUES(expires)`;
+    db.query(sql, [sid, JSON.stringify(sess), expires])
       .then(() => callback(null))
       .catch((error) => callback(error));
   }

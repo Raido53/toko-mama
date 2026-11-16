@@ -1,43 +1,93 @@
-<header class="site-header">
-  <div class="container header-inner">
-    <a class="brand" href="/">
-      <span class="logo" aria-hidden="true">TM</span>
-      <span class="brand-text">
-        <strong>Toko Mama</strong>
-        <small>Katalog &amp; dashboard UMKM</small>
-      </span>
-    </a>
-
-    <nav class="main-nav" aria-label="Navigasi utama">
-      <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Katalog</a>
-      <% if (currentUser && currentUser.role === 'admin') { %>
-        <a href="/admin/users" class="<%= currentPath.startsWith('/admin') ? 'active' : '' %>">Kelola User</a>
-      <% } %>
-      <% if (currentUser && currentUser.role === 'seller') { %>
-        <a href="/seller/produk" class="<%= currentPath.startsWith('/seller/produk') ? 'active' : '' %>">Produk</a>
-        <a href="/seller/kategori" class="<%= currentPath.startsWith('/seller/kategori') ? 'active' : '' %>">Kategori</a>
-      <% } %>
-      <% if (currentUser && currentUser.role === 'pembeli') { %>
-        <a href="/akun" class="<%= currentPath.startsWith('/akun') ? 'active' : '' %>">Akun Saya</a>
-      <% } %>
-    </nav>
-
-    <div class="header-actions">
+<div class="topbar">
+  <div class="container topbar-inner">
+    <span class="topbar-note">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/></svg>
+      Pesan langsung via WhatsApp — dibalas admin toko, tanpa ribet.
+    </span>
+    <div class="topbar-links">
+      <a href="/#bantuan">Bantuan</a>
+      <a href="/#kategori">Kategori</a>
       <% if (currentUser) { %>
-        <span class="user-chip">
-          <span class="avatar" aria-hidden="true"><%= currentUser.name.charAt(0).toUpperCase() %></span>
-          <span class="user-meta">
-            <strong><%= currentUser.name %></strong>
-            <small><%= roles[currentUser.role] %></small>
-          </span>
-        </span>
-        <form action="/logout" method="post">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <button type="submit" class="btn btn-ghost btn-sm">Keluar</button>
-        </form>
+        <a href="/profil">Profil Saya</a>
       <% } else { %>
-        <a class="btn btn-primary btn-sm" href="/login">Masuk</a>
+        <a href="/register">Daftar Akun</a>
       <% } %>
     </div>
   </div>
+</div>
+
+<header class="site-header">
+  <div class="container header-main">
+    <a class="brand" href="/">
+      <span class="logo" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.4 11.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8L4 8Z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/></svg>
+      </span>
+      <span class="brand-text">
+        <strong>Toko Mama</strong>
+        <small>Katalog UMKM · Pesan via WhatsApp</small>
+      </span>
+    </a>
+
+    <form class="header-search" role="search" action="/" method="get">
+      <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Cari beras, sabun, popok bayi…" aria-label="Cari produk">
+      <button type="submit" aria-label="Cari produk">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+    </form>
+
+    <div class="header-actions">
+      <% if (currentUser) { %>
+        <a class="account-btn" href="/profil" title="Buka profil saya">
+          <%- include('avatar', { user: currentUser }) %>
+          <span class="account-meta">
+            <small><%= roles[currentUser.role] %></small>
+            <strong><%= currentUser.name.split(' ')[0] %></strong>
+          </span>
+        </a>
+        <form action="/logout" method="post" class="logout-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="icon-btn" title="Keluar" aria-label="Keluar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l5-5-5-5"/><path d="M20 12H9"/><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6"/></svg>
+          </button>
+        </form>
+      <% } else { %>
+        <a class="account-btn" href="/login" title="Masuk atau daftar">
+          <span class="avatar avatar-initial">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.2-3.4 3.8-5 7-5s5.8 1.6 7 5"/></svg>
+          </span>
+          <span class="account-meta">
+            <small>Belum masuk</small>
+            <strong>Masuk / Daftar</strong>
+          </span>
+        </a>
+      <% } %>
+
+      <% if (whatsapp.link) { %>
+        <a class="btn btn-wa btn-sm chat-header" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya tentang produk.') %>" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Z"/></svg>
+          Chat Admin
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <nav class="cat-nav" aria-label="Navigasi katalog">
+    <div class="container cat-nav-inner">
+      <a class="cat-nav-link <%= currentPath === '/' ? 'active' : '' %>" href="/">Semua Produk</a>
+      <% (navCategories || []).slice(0, 7).forEach((item) => { %>
+        <a class="cat-nav-link" href="/?kategori=<%= item.slug %>"><%= item.name %></a>
+      <% }); %>
+      <span class="cat-nav-spacer"></span>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <a class="cat-nav-link role-link" href="/admin/users">Kelola User</a>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'seller') { %>
+        <a class="cat-nav-link role-link" href="/seller/produk">Kelola Produk</a>
+        <a class="cat-nav-link role-link" href="/seller/kategori">Kelola Kategori</a>
+      <% } %>
+      <% if (!currentUser) { %>
+        <a class="cat-nav-link role-link" href="/register">Daftar Akun</a>
+      <% } %>
+    </div>
+  </nav>
 </header>

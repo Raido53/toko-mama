@@ -1,0 +1,77 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container auth-page">
+  <%- include('../partials/flash') %>
+
+  <div class="auth-layout">
+    <section class="panel glass-card auth-panel">
+      <span class="hero-eyebrow">Akun pembeli</span>
+      <h1>Daftar akun Toko Mama</h1>
+      <p class="hint">Cukup satu akun untuk menyimpan profil dan mempermudah komunikasi dengan admin.</p>
+
+      <% if (errors && errors.length) { %>
+        <div class="alert alert-error">
+          <ul><% errors.forEach((message) => { %><li><%= message %></li><% }); %></ul>
+        </div>
+      <% } %>
+
+      <form method="post" action="/register" class="stack" data-check-form>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="field-block">
+          <span>Nama lengkap</span>
+          <input type="text" name="name" value="<%= form.name %>" maxlength="80" required autofocus>
+        </label>
+        <label class="field-block">
+          <span>Email</span>
+          <input type="email" name="email" value="<%= form.email %>" maxlength="160" autocomplete="email" data-check="email" required>
+        </label>
+        <div class="grid-2">
+          <label class="field-block">
+            <span>Password</span>
+            <input type="password" name="password" minlength="8" autocomplete="new-password" data-check="password" data-min="8" required>
+          </label>
+          <label class="field-block">
+            <span>Ulangi password</span>
+            <input type="password" name="confirm_password" minlength="8" autocomplete="new-password" data-check="match" data-match-input="password" required>
+          </label>
+        </div>
+
+        <div class="pw-meter" data-pw-meter data-for="password">
+          <div class="pw-meter-bar"><span></span></div>
+          <p class="pw-meter-label">Kekuatan password: <strong>—</strong></p>
+          <ul class="pw-rules">
+            <li data-rule="length">Minimal 8 karakter</li>
+            <li data-rule="mix">Kombinasi huruf dan angka</li>
+            <li data-rule="match">Konfirmasi password sama</li>
+          </ul>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Daftar sekarang</button>
+      </form>
+
+      <p class="auth-switch">Sudah punya akun? <a href="/login">Masuk di sini</a></p>
+    </section>
+
+    <aside class="panel glass-card auth-side">
+      <h2>Kenapa perlu akun?</h2>
+      <ul class="check-list">
+        <li>Foto profil dan nama tersimpan otomatis.</li>
+        <li>Admin lebih mudah mengenali pesanan Anda.</li>
+        <li>Bisa mengganti password sendiri kapan saja.</li>
+        <li>Gratis — akun seller &amp; admin dibuat oleh pengelola toko.</li>
+      </ul>
+      <div class="auth-tip">
+        <strong>Butuh bantuan?</strong>
+        <% if (whatsapp.link) { %>
+          <a class="btn btn-wa btn-block" href="<%= whatsapp.linkFor('Halo Admin Toko Mama, saya ingin bertanya soal akun.') %>" target="_blank" rel="noopener noreferrer">Chat Admin</a>
+        <% } else { %>
+          <p class="hint">Nomor WhatsApp admin belum diatur.</p>
+        <% } %>
+      </div>
+      <p class="hint">Sudah punya akun demo? Admin: admin@tokomama.id · Seller: mama@tokomama.id</p>
+    </aside>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

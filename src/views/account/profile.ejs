@@ -1,0 +1,94 @@
+<%- include('../partials/head') %>
+<%- include('../partials/nav') %>
+
+<main id="main" class="container">
+  <%- include('../partials/flash') %>
+
+  <section class="section-head page-head-compact">
+    <span class="section-number">Profil</span>
+    <h1>Profil Saya</h1>
+    <span class="section-count"><span class="tag tag-<%= currentUser.role %>"><%= roles[currentUser.role] %></span></span>
+  </section>
+
+  <% if (errors && errors.length) { %>
+    <div class="alert alert-error">
+      <ul><% errors.forEach((message) => { %><li><%= message %></li><% }); %></ul>
+    </div>
+  <% } %>
+
+  <div class="profile-layout">
+    <section class="panel glass-card profile-card">
+      <div class="profile-avatar-wrap">
+        <%- include('../partials/avatar', { user: currentUser }) %>
+        <div>
+          <h2><%= currentUser.name %></h2>
+          <p class="hint"><%= currentUser.email %></p>
+          <p class="hint">Bergabung <%= dateId(currentUser.created_at) %></p>
+        </div>
+      </div>
+
+      <form method="post" action="/profil" enctype="multipart/form-data" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <div class="upload-box">
+          <strong>Foto profil</strong>
+          <p class="hint">JPG, PNG, atau WebP maksimal 2 MB. Foto tampil di header dan daftar user.</p>
+          <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-image-input data-preview-target="#avatar-preview">
+          <img id="avatar-preview" class="avatar-preview-img" src="<%= currentUser.avatar_url || '/assets/img-placeholder.svg' %>" alt="Pratinjau foto profil">
+          <% if (currentUser.avatar_url) { %>
+            <label class="check">
+              <input type="checkbox" name="remove_avatar" value="1">
+              <span>Hapus foto profil saat menyimpan</span>
+            </label>
+          <% } %>
+        </div>
+
+        <label class="field-block">
+          <span>Nama lengkap</span>
+          <input type="text" name="name" value="<%= form.name %>" maxlength="80" required>
+        </label>
+        <label class="field-block">
+          <span>Nomor WhatsApp</span>
+          <input type="text" name="phone" value="<%= form.phone %>" inputmode="numeric" placeholder="628xxxxxxxxxx" maxlength="20">
+        </label>
+
+        <button type="submit" class="btn btn-primary">Simpan profil</button>
+      </form>
+    </section>
+
+    <div class="profile-side">
+      <section class="panel glass-card">
+        <h2>Ganti password</h2>
+        <form method="post" action="/profil/password" class="stack" data-check-form>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <label class="field-block">
+            <span>Password saat ini</span>
+            <input type="password" name="current_password" autocomplete="current-password" required>
+          </label>
+          <div class="grid-2">
+            <label class="field-block">
+              <span>Password baru</span>
+              <input type="password" name="new_password" minlength="8" autocomplete="new-password" data-check="password" data-min="8" required>
+            </label>
+            <label class="field-block">
+              <span>Ulangi password baru</span>
+              <input type="password" name="confirm_password" minlength="8" autocomplete="new-password" data-check="match" data-match-input="new_password" required>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-ghost">Perbarui password</button>
+        </form>
+      </section>
+
+      <section class="panel glass-card panel-wa">
+        <h2>Bantuan cepat</h2>
+        <p class="hint">Perubahan data akun atau pertanyaan lain bisa langsung dikirim ke admin.</p>
+        <% if (whatsapp.link) { %>
+          <a class="btn btn-wa btn-block" href="<%= whatsapp.linkFor(`Halo Admin Toko Mama, saya ${currentUser.name}. Saya ingin bertanya.`) %>" target="_blank" rel="noopener noreferrer">Chat Admin via WhatsApp</a>
+        <% } %>
+        <a class="btn btn-ghost btn-block" href="/">Lihat katalog</a>
+      </section>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

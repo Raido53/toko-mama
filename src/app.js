@@ -7,6 +7,7 @@ const config = require('./config');
 const db = require('./db');
 const MySQLSessionStore = require('./session-store');
 const { getWhatsappNumber } = require('./settings');
+const { getNavCategories } = require('./navigation');
 const { rupiah, dateId } = require('./utils/format');
 const { attachUser } = require('./middleware/auth');
 const { csrfToken, verifyCsrf } = require('./middleware/csrf');
@@ -17,6 +18,8 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.disable('x-powered-by');
+// Vercel/Proxy: agar cookie secure dan req.secure terdeteksi benar.
+app.set('trust proxy', 1);
 
 app.use(
   helmet({
@@ -81,9 +84,14 @@ app.use(async (req, res, next) => {
   res.locals.rupiah = rupiah;
   res.locals.dateId = dateId;
   res.locals.whatsapp = { number: '', link: null, linkFor: () => null };
+  res.locals.navCategories = [];
 
   try {
-    const number = (await getWhatsappNumber()) || '';
+    const [number, navCategories] = await Promise.all([
+      getWhatsappNumber(),
+      getNavCategories(),
+    ]);
+    res.locals.navCategories = navCategories;
     res.locals.whatsapp = {
       number,
       link: number ? `https://wa.me/${number}` : null,
@@ -103,7 +111,7 @@ app.use(verifyCsrf);
 
 app.use('/', require('./routes/catalog'));
 app.use('/', require('./routes/auth'));
-app.use('/', require('./routes/account'));
+app.use('/', require('./routes/profile'));
 app.use('/admin', require('./routes/admin'));
 app.use('/seller', require('./routes/seller'));
 
@@ -127,15 +135,24 @@ app.use((error, req, res, next) => {
 
 async function start() {
   await db.pool.query('SELECT 1');
-  const server = app.listen(config.port, config.host, () => {
+  const server = app.listen(config.port, config.host);
+
+  server.on('listening', () => {
     const address = server.address();
-    const bound =
-      address && typeof address === 'object' ? `${address.address}:${address.port}` : String(address);
-    console.log(`Toko Mama berjalan di ${config.appUrl} (${config.env}) — listen ${bound}`);
+    const port = address && typeof address === 'object' ? address.port : config.port;
+    console.log(`Toko Mama berjalan di ${config.appUrl} (${config.env}) — http://${config.host}:${port}`);
   });
 
   server.on('error', (error) => {
-    console.error('Gagal membuka port:', error.message);
+    if (error.code === 'EADDRINUSE') {
+      console.error(
+        `Port ${config.port} sudah dipakai proses lain. Hentikan proses tersebut atau ubah PORT di .env.`
+      );
+    } else if (error.code === 'EACCES') {
+      console.error(`Tidak punya izin membuka port ${config.port}. Gunakan port lain di .env.`);
+    } else {
+      console.error('Gagal membuka port:', error.message);
+    }
     process.exit(1);
   });
 
@@ -150,9 +167,11 @@ async function start() {
   process.on('SIGTERM', shutdown);
 }
 
-start().catch((error) => {
-  console.error('Gagal menjalankan aplikasi:', error.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  start().catch((error) => {
+    console.error('Gagal menjalankan aplikasi:', error.message);
+    process.exit(1);
+  });
+}
 
 module.exports = app;

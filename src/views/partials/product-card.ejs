@@ -1,6 +1,7 @@
-<article class="product-card">
+<article class="product-card glass-card">
   <a class="product-thumb" href="/produk/<%= product.id %>" aria-label="<%= product.name %>">
-    <% if (product.is_featured) { %><span class="badge">★ Unggulan</span><% } %>
+    <% if (product.is_featured) { %><span class="badge">Terlaris</span><% } %>
+    <% if (product.stock === 0) { %><span class="badge badge-muted">Stok habis</span><% } %>
     <img src="<%= product.image_url || '/assets/img-placeholder.svg' %>" alt="<%= product.name %>" loading="lazy">
   </a>
   <div class="product-body">
@@ -13,7 +14,10 @@
     </p>
     <p class="desc"><%= product.description || 'Produk pilihan Toko Mama.' %></p>
     <% if (whatsapp.linkFor) { %>
-      <a class="btn btn-wa" href="<%= whatsapp.linkFor(`Halo Toko Mama, saya mau pesan produk: ${product.name} (${rupiah(product.price)}). Apakah stok masih tersedia?`) %>" target="_blank" rel="noopener noreferrer">Pesan via WhatsApp</a>
+      <a class="btn btn-wa" href="<%= whatsapp.linkFor(`Halo Toko Mama, saya mau pesan produk: ${product.name} (${rupiah(product.price)}). Apakah stok masih tersedia?`) %>" target="_blank" rel="noopener noreferrer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12 0C5.4 0 0 5.4 0 12c0 2.1.5 4.1 1.6 5.9L0 24l6.3-1.6A12 12 0 0 0 12 24c6.6 0 12-5.4 12-12 0-3.2-1.3-6.2-3.5-8.5ZM12 22c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A10 10 0 1 1 12 22Z"/></svg>
+        Pesan via WhatsApp
+      </a>
     <% } else { %>
       <span class="btn btn-disabled" aria-disabled="true">WhatsApp belum diatur</span>
     <% } %>

@@ -5,8 +5,9 @@ const { asyncHandler } = require('../utils/async');
 const { str, int } = require('../utils/validate');
 const { slugify } = require('../utils/format');
 const { requireRole } = require('../middleware/auth');
+const { invalidateNavCache } = require('../navigation');
 const { verifyCsrfForParsedBody } = require('../middleware/csrf');
-const { upload, removeUploadedFile } = require('../uploads');
+const { upload, storedImageUrl, removeUploadedFile } = require('../uploads');
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ async function productPageData(req, opts = {}) {
   const where = ['p.seller_id = ?'];
   const params = [req.user.id];
   if (q) {
-    where.push('(p.name LIKE ? OR p.description LIKE ?)');
+    where.push(`(p.name ${db.like} ? OR p.description ${db.like} ?)`);
     params.push(`%${q}%`, `%${q}%`);
   }
   if (category) {
@@ -60,8 +61,8 @@ async function productPageData(req, opts = {}) {
 
   const statsRow = await db.one(
     `SELECT COUNT(*) AS total, COALESCE(SUM(stock), 0) AS stock,
-            COALESCE(SUM(is_featured = 1), 0) AS featured,
-            COALESCE(SUM(stock = 0), 0) AS out_of_stock
+            COALESCE(SUM(CASE WHEN is_featured = 1 THEN 1 ELSE 0 END), 0) AS featured,
+            COALESCE(SUM(CASE WHEN stock = 0 THEN 1 ELSE 0 END), 0) AS out_of_stock
        FROM products WHERE seller_id = ?`,
     [req.user.id]
   );
@@ -150,7 +151,7 @@ async function parseProductForm(req) {
 
   let imageUrl = '';
   if (req.file) {
-    imageUrl = `/uploads/${req.file.filename}`;
+    imageUrl = storedImageUrl(req.file);
   } else if (imageUrlInput) {
     if (!/^(https?:\/\/|\/)/i.test(imageUrlInput)) {
       errors.push('URL gambar harus diawali http://, https://, atau /.');
@@ -184,7 +185,7 @@ async function handleSave(req, res, { product }) {
   const { errors, values } = await parseProductForm(req);
 
   if (errors.length) {
-    if (req.file) removeUploadedFile(`/uploads/${req.file.filename}`);
+    if (req.file) removeUploadedFile(storedImageUrl(req.file));
     const data = await productPageData(req, {
       q: '',
       category: '',
@@ -220,6 +221,7 @@ async function handleSave(req, res, { product }) {
         req.user.id,
       ]
     );
+    invalidateNavCache();
     res.locals.addFlash('success', `Produk "${values.name}" diperbarui.`);
   } else {
     await db.query(
@@ -236,6 +238,7 @@ async function handleSave(req, res, { product }) {
         values.isFeatured ? 1 : 0,
       ]
     );
+    invalidateNavCache();
     res.locals.addFlash('success', `Produk "${values.name}" ditambahkan.`);
   }
 
@@ -259,7 +262,7 @@ router.post(
       [req.params.id, req.user.id]
     );
     if (!product) {
-      if (req.file) removeUploadedFile(`/uploads/${req.file.filename}`);
+      if (req.file) removeUploadedFile(storedImageUrl(req.file));
       res.locals.addFlash('error', 'Produk tidak ditemukan atau bukan milik Anda.');
       return res.redirect('/seller/produk');
     }
@@ -284,6 +287,7 @@ router.post(
       req.user.id,
     ]);
     removeUploadedFile(product.image_url);
+    invalidateNavCache();
     res.locals.addFlash('success', `Produk "${product.name}" dihapus.`);
     return res.redirect('/seller/produk');
   })
@@ -376,6 +380,7 @@ router.post(
       [name, slug, description || null, req.user.id]
     );
 
+    invalidateNavCache();
     res.locals.addFlash('success', `Kategori "${name}" ditambahkan.`);
     return res.redirect('/seller/kategori');
   })
@@ -420,6 +425,7 @@ router.post(
       id,
     ]);
 
+    invalidateNavCache();
     res.locals.addFlash('success', `Kategori "${name}" diperbarui.`);
     return res.redirect('/seller/kategori');
   })
@@ -445,6 +451,7 @@ router.post(
     }
 
     await db.query('DELETE FROM categories WHERE id = ?', [id]);
+    invalidateNavCache();
     res.locals.addFlash('success', `Kategori "${category.name}" dihapus.`);
     return res.redirect('/seller/kategori');
   })
